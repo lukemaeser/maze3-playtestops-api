@@ -35,23 +35,29 @@ This project was created to make that workflow more organized and repeatable wit
 - Capture bug reports with severity, status, repro steps, and related session data.
 - Store feedback notes by category, rating, and tester comment.
 - Provide a clean REST API for playtest operations.
-- Include a small Python analysis layer for reviewing exported playtest data and spotting basic build-quality trends.
+- Deploy the API with a cloud-hosted SQL database and repeatable CI/CD workflow.
 
 ## Tech Stack
 
 - C#
 - ASP.NET Core Web API
 - Entity Framework Core
-- SQLite
+- SQL Server / Azure SQL
+- Azure App Service
+- GitHub Actions
 - Swagger / OpenAPI
-- Python for playtest data analysis
+
+## Planned Analysis Layer
+
+A small Python analysis layer is planned for exported playtest data. The goal is to summarize build activity, bug severity, and feedback patterns without adding analytics complexity to the core API.
 
 ## Roadmap
 
-- V1: Core API, SQLite database, CRUD endpoints, and Swagger documentation.
-- V2: Data export and Python analysis summaries.
-- V3: Unity editor integration or a simple web dashboard.
-- V4: Authentication and hosted deployment.
+- V1: Core API, EF Core models, SQL database, CRUD endpoints, and Swagger documentation.
+- V2: Azure App Service deployment, Azure SQL configuration, logging, and GitHub Actions CI/CD.
+- V3: Data export and Python playtest summaries.
+- V4: Unity editor integration or a simple web dashboard.
+- V5: Authentication and role-based access.
 
 ## Current Status
 
