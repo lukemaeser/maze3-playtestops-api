@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "7c3MdAgTqcsMO45QCyOm/SJAlgHXscEjXPUuDbAYpUs=",
+  "Source": "Maze3.PlayTestOps.Api",
+  "BasePath": "_content/Maze3.PlayTestOps.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
