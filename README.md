@@ -2,7 +2,7 @@
 
 MAZE3 PlayTestOps API is a lightweight ASP.NET Core Web API built for MAZE3 Studios to organize playtesting across games, prototypes, and gameplay systems in development.
 
-The tool keeps build notes, playtest sessions, bug reports, and feedback in one structured place instead of spreading that information across notes, messages, and spreadsheets. Each playtest should make the next build easier to review and improve.
+The API keeps build notes, playtest sessions, bug reports, and feedback in one structured place instead of spreading that information across notes, messages, and spreadsheets. Each playtest should make the next build easier to review and improve.
 
 ## Project Purpose
 
@@ -28,14 +28,14 @@ This project was created to make that workflow more organized and repeatable wit
 - Export playtest data for basic analysis.
 - Support future Unity editor tools, dashboards, or external playtest forms.
 
-## Core Goals
+## Core Features
 
 - Track game builds, versions, branches, and release notes.
 - Record playtest sessions by build, tester, platform, date, and notes.
 - Capture bug reports with severity, status, repro steps, and related session data.
 - Store feedback notes by category, rating, and tester comment.
-- Provide a clean REST API for playtest operations.
-- Deploy the API with a cloud-hosted SQL database and repeatable CI/CD workflow.
+- Provide Swagger/OpenAPI documentation for testing and reviewing endpoints.
+- Use a SQL-backed data model that can run locally and support cloud deployment.
 
 ## Tech Stack
 
@@ -49,7 +49,9 @@ This project was created to make that workflow more organized and repeatable wit
 
 ## Planned Analysis Layer
 
-A small Python analysis layer is planned for exported playtest data. The goal is to summarize build activity, bug severity, and feedback patterns without adding analytics complexity to the core API.
+A small Python analysis layer is planned for exported playtest data.
+
+The goal is to summarize build activity, bug severity, and feedback patterns without adding analytics complexity to the core API.
 
 ## Roadmap
 
