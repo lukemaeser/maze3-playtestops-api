@@ -31,3 +31,4 @@ C:\Users\lukem\maze3-playtestops-api\Maze3.PlayTestOps.Api\obj\Debug\net9.0\refi
 C:\Users\lukem\maze3-playtestops-api\Maze3.PlayTestOps.Api\obj\Debug\net9.0\Maze3.PlayTestOps.Api.pdb
 C:\Users\lukem\maze3-playtestops-api\Maze3.PlayTestOps.Api\obj\Debug\net9.0\Maze3.PlayTestOps.Api.genruntimeconfig.cache
 C:\Users\lukem\maze3-playtestops-api\Maze3.PlayTestOps.Api\obj\Debug\net9.0\ref\Maze3.PlayTestOps.Api.dll
+C:\Users\lukem\maze3-playtestops-api\Maze3.PlayTestOps.Api\obj\Debug\net9.0\Maze3.PlayTestOps.Api.sourcelink.json
