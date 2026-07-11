@@ -13,8 +13,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Temporary in-memory data store.
-// Later, this will be replaced by EF Core + SQL.
+// Temporary in-memory data.
+// This is a fake database for now.
+// Later, EF Core + SQL Server / Azure SQL will replace this.
 var gameBuilds = new List<GameBuild>
 {
     new GameBuild
@@ -24,27 +25,30 @@ var gameBuilds = new List<GameBuild>
         Version = "0.0.1",
         Branch = "main",
         BuildDate = DateTime.UtcNow,
-        ReleaseNotes = "Initial prototype build for interaction testing."
+        ReleaseNotes = "Initial prototype/interactions build."
     }
 };
 
-// READ all builds
+// GET = read all game builds
 app.MapGet("/api/gamebuilds", () =>
 {
     return Results.Ok(gameBuilds);
 });
 
-// READ one build by id
+// GET = read one game build by ID
 app.MapGet("/api/gamebuilds/{id:int}", (int id) =>
 {
     var build = gameBuilds.FirstOrDefault(build => build.Id == id);
 
-    return build is not null
-        ? Results.Ok(build)
-        : Results.NotFound();
+    if (build is null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(build);
 });
 
-// CREATE a new build
+// POST = create a new game build
 app.MapPost("/api/gamebuilds", (GameBuild newBuild) =>
 {
     var nextId = gameBuilds.Count == 0
@@ -52,16 +56,18 @@ app.MapPost("/api/gamebuilds", (GameBuild newBuild) =>
         : gameBuilds.Max(build => build.Id) + 1;
 
     newBuild.Id = nextId;
-    newBuild.BuildDate = newBuild.BuildDate == default
-        ? DateTime.UtcNow
-        : newBuild.BuildDate;
+
+    if (newBuild.BuildDate == default)
+    {
+        newBuild.BuildDate = DateTime.UtcNow;
+    }
 
     gameBuilds.Add(newBuild);
 
     return Results.Created($"/api/gamebuilds/{newBuild.Id}", newBuild);
 });
 
-// UPDATE an existing build
+// PUT = update an existing game build
 app.MapPut("/api/gamebuilds/{id:int}", (int id, GameBuild updatedBuild) =>
 {
     var build = gameBuilds.FirstOrDefault(build => build.Id == id);
@@ -80,7 +86,7 @@ app.MapPut("/api/gamebuilds/{id:int}", (int id, GameBuild updatedBuild) =>
     return Results.Ok(build);
 });
 
-// DELETE a build
+// DELETE = remove a game build
 app.MapDelete("/api/gamebuilds/{id:int}", (int id) =>
 {
     var build = gameBuilds.FirstOrDefault(build => build.Id == id);

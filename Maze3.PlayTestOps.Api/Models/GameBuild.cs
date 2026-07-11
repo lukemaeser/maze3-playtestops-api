@@ -13,4 +13,6 @@ public class GameBuild
     public DateTime BuildDate { get; set; }
 
     public string ReleaseNotes { get; set; } = string.Empty;
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
