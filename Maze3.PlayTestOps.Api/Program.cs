@@ -83,7 +83,7 @@ app.MapGet("/api/gamebuilds/{id:int}", (int id) =>
 
     if (build is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("GameBuild not found.");
     }
 
     return Results.Ok(build);
@@ -92,6 +92,16 @@ app.MapGet("/api/gamebuilds/{id:int}", (int id) =>
 // POST = create a new game build
 app.MapPost("/api/gamebuilds", (GameBuild newBuild) =>
 {
+    if (string.IsNullOrWhiteSpace(newBuild.ProjectName))
+    {
+        return Results.BadRequest("ProjectName is required.");
+    }
+
+    if (string.IsNullOrWhiteSpace(newBuild.Version))
+    {
+        return Results.BadRequest("Version is required.");
+    }
+
     var nextId = gameBuilds.Count == 0
         ? 1
         : gameBuilds.Max(build => build.Id) + 1;
@@ -115,7 +125,7 @@ app.MapPut("/api/gamebuilds/{id:int}", (int id, GameBuild updatedBuild) =>
 
     if (build is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("GameBuild not found.");
     }
 
     build.ProjectName = updatedBuild.ProjectName;
@@ -134,7 +144,7 @@ app.MapDelete("/api/gamebuilds/{id:int}", (int id) =>
 
     if (build is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("GameBuild not found.");
     }
 
     gameBuilds.Remove(build);
@@ -155,12 +165,22 @@ app.MapGet("/api/sessions/{id:int}", (int id) =>
 
     return session is not null
         ? Results.Ok(session)
-        : Results.NotFound();
+        : Results.NotFound("PlaytestSession not found.");
 });
 
 // CREATE a new playtest session
 app.MapPost("/api/sessions", (PlaytestSession newSession) =>
 {
+    if (string.IsNullOrWhiteSpace(newSession.TesterName))
+    {
+        return Results.BadRequest("TesterName is required.");
+    }
+
+    if (string.IsNullOrWhiteSpace(newSession.Platform))
+    {
+        return Results.BadRequest("Platform is required.");
+    }
+
     var nextId = playtestSessions.Count == 0
         ? 1
         : playtestSessions.Max(session => session.Id) + 1;
@@ -184,7 +204,7 @@ app.MapPut("/api/sessions/{id:int}", (int id, PlaytestSession updatedSession) =>
 
     if (session is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("PlaytestSession not found.");
     }
 
     session.GameBuildId = updatedSession.GameBuildId;
@@ -203,7 +223,7 @@ app.MapDelete("/api/sessions/{id:int}", (int id) =>
 
     if (session is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("PlaytestSession not found.");
     }
 
     playtestSessions.Remove(session);
@@ -224,7 +244,7 @@ app.MapGet("/api/bugs/{id:int}", (int id) =>
 
     if (bug is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("BugReport not found.");
     }
 
     return Results.Ok(bug);
@@ -233,6 +253,16 @@ app.MapGet("/api/bugs/{id:int}", (int id) =>
 // CREATE a new bug report
 app.MapPost("/api/bugs", (BugReport newBug) =>
 {
+    if (string.IsNullOrWhiteSpace(newBug.Title))
+    {
+        return Results.BadRequest("Title is required.");
+    }
+
+    if (string.IsNullOrWhiteSpace(newBug.Description))
+    {
+        return Results.BadRequest("Description is required.");
+    }
+
     var nextId = bugReports.Count == 0
         ? 1
         : bugReports.Max(bug => bug.Id) + 1;
@@ -256,7 +286,7 @@ app.MapPut("/api/bugs/{id:int}", (int id, BugReport updatedBug) =>
 
     if (bug is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("BugReport not found.");
     }
 
     bug.PlaytestSessionId = updatedBug.PlaytestSessionId;
@@ -276,7 +306,7 @@ app.MapDelete("/api/bugs/{id:int}", (int id) =>
 
     if (bug is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("BugReport not found.");
     }
 
     bugReports.Remove(bug);
@@ -297,7 +327,7 @@ app.MapGet("/api/feedback/{id:int}", (int id) =>
 
     if (feedback is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("FeedbackNote not found.");
     }
 
     return Results.Ok(feedback);
@@ -306,6 +336,16 @@ app.MapGet("/api/feedback/{id:int}", (int id) =>
 // CREATE a new feedback note
 app.MapPost("/api/feedback", (FeedbackNote newFeedback) =>
 {
+    if (string.IsNullOrWhiteSpace(newFeedback.Category))
+    {
+        return Results.BadRequest("Category is required.");
+    }
+
+    if (string.IsNullOrWhiteSpace(newFeedback.Comment))
+    {
+        return Results.BadRequest("Comment is required.");
+    }
+
     var nextId = feedbackNotes.Count == 0
         ? 1
         : feedbackNotes.Max(feedback => feedback.Id) + 1;
@@ -329,7 +369,7 @@ app.MapPut("/api/feedback/{id:int}", (int id, FeedbackNote updatedFeedback) =>
 
     if (feedback is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("FeedbackNote not found.");
     }
 
     feedback.PlaytestSessionId = updatedFeedback.PlaytestSessionId;
@@ -347,7 +387,7 @@ app.MapDelete("/api/feedback/{id:int}", (int id) =>
 
     if (feedback is null)
     {
-        return Results.NotFound();
+        return Results.NotFound("FeedbackNote not found.");
     }
 
     feedbackNotes.Remove(feedback);

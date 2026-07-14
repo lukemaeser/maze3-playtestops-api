@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Maze3.PlayTestOps.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+984d0898ba0416e63d84b10b77d2421dedc351da")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6ef34e44e2892d284c5462d3d092813bb67a51bc")]
 [assembly: System.Reflection.AssemblyProductAttribute("Maze3.PlayTestOps.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Maze3.PlayTestOps.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
