@@ -1,6 +1,12 @@
+using Maze3.PlayTestOps.Api.Data;
 using Maze3.PlayTestOps.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<PlayTestOpsDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("PlayTestOpsDatabase")));
 
 builder.Services.AddOpenApi();
 
@@ -13,73 +19,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Temporary in-memory data.
-// This is a fake database for now.
-// Later, EF Core + SQL Server / Azure SQL will replace this.
-var gameBuilds = new List<GameBuild>
-{
-    new GameBuild
-    {
-        Id = 1,
-        ProjectName = "It Waits in the Deep",
-        Version = "0.0.1",
-        Branch = "main",
-        BuildDate = DateTime.UtcNow,
-        ReleaseNotes = "Initial prototype/interactions build."
-    }
-};
+// GAME BUILDS
 
-var playtestSessions = new List<PlaytestSession>
+// GET all game builds
+app.MapGet("/api/gamebuilds", async (PlayTestOpsDbContext db) =>
 {
-    new PlaytestSession
-    {
-        Id = 1,
-        GameBuildId = 1,
-        TesterName = "Internal Tester 01",
-        Platform = "Windows",
-        SessionDate = DateTime.UtcNow,
-        Notes = "Tester completed the main interaction loop and noted initial feedback."
-    }
-};
-
-var bugReports = new List<BugReport>
-{
-    new BugReport
-    {
-        Id = 1,
-        PlaytestSessionId = 1,
-        Title = "Door prompt remains visible after interaction",
-        Description = "The interaction prompt stays on screen after the player opens the door.",
-        Severity = "Medium",
-        Status = "Open",
-        ReproSteps = "Start the build, approach the door, open the door, then step backward.",
-        CreatedAt = DateTime.UtcNow
-    }
-};
-
-var feedbackNotes = new List<FeedbackNote>
-{
-    new FeedbackNote
-    {
-        Id = 1,
-        PlaytestSessionId = 1,
-        Category = "Gameplay",
-        Comment = "Door interaction worked, but the tester wanted stronger visual feedback.",
-        Rating = 4,
-        CreatedAt = DateTime.UtcNow
-    }
-};
-
-// GET = read all game builds
-app.MapGet("/api/gamebuilds", () =>
-{
+    var gameBuilds = await db.GameBuilds.ToListAsync();
     return Results.Ok(gameBuilds);
 });
 
-// GET = read one game build by ID
-app.MapGet("/api/gamebuilds/{id:int}", (int id) =>
+// GET one game build by ID
+app.MapGet("/api/gamebuilds/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var build = gameBuilds.FirstOrDefault(build => build.Id == id);
+    var build = await db.GameBuilds.FindAsync(id);
 
     if (build is null)
     {
@@ -89,8 +43,10 @@ app.MapGet("/api/gamebuilds/{id:int}", (int id) =>
     return Results.Ok(build);
 });
 
-// POST = create a new game build
-app.MapPost("/api/gamebuilds", (GameBuild newBuild) =>
+// POST a new game build
+app.MapPost("/api/gamebuilds", async (
+    GameBuild newBuild,
+    PlayTestOpsDbContext db) =>
 {
     if (string.IsNullOrWhiteSpace(newBuild.ProjectName))
     {
@@ -102,26 +58,34 @@ app.MapPost("/api/gamebuilds", (GameBuild newBuild) =>
         return Results.BadRequest("Version is required.");
     }
 
-    var nextId = gameBuilds.Count == 0
-        ? 1
-        : gameBuilds.Max(build => build.Id) + 1;
-
-    newBuild.Id = nextId;
+    // SQL Server now generates the ID.
+    newBuild.Id = 0;
 
     if (newBuild.BuildDate == default)
     {
         newBuild.BuildDate = DateTime.UtcNow;
     }
 
-    gameBuilds.Add(newBuild);
+    if (newBuild.CreatedAt == default)
+    {
+        newBuild.CreatedAt = DateTime.UtcNow;
+    }
 
-    return Results.Created($"/api/gamebuilds/{newBuild.Id}", newBuild);
+    db.GameBuilds.Add(newBuild);
+    await db.SaveChangesAsync();
+
+    return Results.Created(
+        $"/api/gamebuilds/{newBuild.Id}",
+        newBuild);
 });
 
-// PUT = update an existing game build
-app.MapPut("/api/gamebuilds/{id:int}", (int id, GameBuild updatedBuild) =>
+// PUT an existing game build
+app.MapPut("/api/gamebuilds/{id:int}", async (
+    int id,
+    GameBuild updatedBuild,
+    PlayTestOpsDbContext db) =>
 {
-    var build = gameBuilds.FirstOrDefault(build => build.Id == id);
+    var build = await db.GameBuilds.FindAsync(id);
 
     if (build is null)
     {
@@ -134,42 +98,57 @@ app.MapPut("/api/gamebuilds/{id:int}", (int id, GameBuild updatedBuild) =>
     build.BuildDate = updatedBuild.BuildDate;
     build.ReleaseNotes = updatedBuild.ReleaseNotes;
 
+    await db.SaveChangesAsync();
+
     return Results.Ok(build);
 });
 
-// DELETE = remove a game build
-app.MapDelete("/api/gamebuilds/{id:int}", (int id) =>
+// DELETE a game build
+app.MapDelete("/api/gamebuilds/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var build = gameBuilds.FirstOrDefault(build => build.Id == id);
+    var build = await db.GameBuilds.FindAsync(id);
 
     if (build is null)
     {
         return Results.NotFound("GameBuild not found.");
     }
 
-    gameBuilds.Remove(build);
+    db.GameBuilds.Remove(build);
+    await db.SaveChangesAsync();
 
     return Results.NoContent();
 });
 
-// READ all playtest sessions
-app.MapGet("/api/sessions", () =>
+// PLAYTEST SESSIONS
+
+// GET all playtest sessions
+app.MapGet("/api/sessions", async (PlayTestOpsDbContext db) =>
 {
-    return Results.Ok(playtestSessions);
+    var sessions = await db.PlaytestSessions.ToListAsync();
+    return Results.Ok(sessions);
 });
 
-// READ one playtest session by id
-app.MapGet("/api/sessions/{id:int}", (int id) =>
+// GET one playtest session by ID
+app.MapGet("/api/sessions/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var session = playtestSessions.FirstOrDefault(session => session.Id == id);
+    var session = await db.PlaytestSessions.FindAsync(id);
 
-    return session is not null
-        ? Results.Ok(session)
-        : Results.NotFound("PlaytestSession not found.");
+    if (session is null)
+    {
+        return Results.NotFound("PlaytestSession not found.");
+    }
+
+    return Results.Ok(session);
 });
 
-// CREATE a new playtest session
-app.MapPost("/api/sessions", (PlaytestSession newSession) =>
+// POST a new playtest session
+app.MapPost("/api/sessions", async (
+    PlaytestSession newSession,
+    PlayTestOpsDbContext db) =>
 {
     if (string.IsNullOrWhiteSpace(newSession.TesterName))
     {
@@ -181,26 +160,28 @@ app.MapPost("/api/sessions", (PlaytestSession newSession) =>
         return Results.BadRequest("Platform is required.");
     }
 
-    var nextId = playtestSessions.Count == 0
-        ? 1
-        : playtestSessions.Max(session => session.Id) + 1;
-
-    newSession.Id = nextId;
+    newSession.Id = 0;
 
     if (newSession.SessionDate == default)
     {
         newSession.SessionDate = DateTime.UtcNow;
     }
 
-    playtestSessions.Add(newSession);
+    db.PlaytestSessions.Add(newSession);
+    await db.SaveChangesAsync();
 
-    return Results.Created($"/api/sessions/{newSession.Id}", newSession);
+    return Results.Created(
+        $"/api/sessions/{newSession.Id}",
+        newSession);
 });
 
-// UPDATE an existing playtest session
-app.MapPut("/api/sessions/{id:int}", (int id, PlaytestSession updatedSession) =>
+// PUT an existing playtest session
+app.MapPut("/api/sessions/{id:int}", async (
+    int id,
+    PlaytestSession updatedSession,
+    PlayTestOpsDbContext db) =>
 {
-    var session = playtestSessions.FirstOrDefault(session => session.Id == id);
+    var session = await db.PlaytestSessions.FindAsync(id);
 
     if (session is null)
     {
@@ -213,34 +194,44 @@ app.MapPut("/api/sessions/{id:int}", (int id, PlaytestSession updatedSession) =>
     session.SessionDate = updatedSession.SessionDate;
     session.Notes = updatedSession.Notes;
 
+    await db.SaveChangesAsync();
+
     return Results.Ok(session);
 });
 
 // DELETE a playtest session
-app.MapDelete("/api/sessions/{id:int}", (int id) =>
+app.MapDelete("/api/sessions/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var session = playtestSessions.FirstOrDefault(session => session.Id == id);
+    var session = await db.PlaytestSessions.FindAsync(id);
 
     if (session is null)
     {
         return Results.NotFound("PlaytestSession not found.");
     }
 
-    playtestSessions.Remove(session);
+    db.PlaytestSessions.Remove(session);
+    await db.SaveChangesAsync();
 
     return Results.NoContent();
 });
 
-// READ all bug reports
-app.MapGet("/api/bugs", () =>
+// BUG REPORTS
+
+// GET all bug reports
+app.MapGet("/api/bugs", async (PlayTestOpsDbContext db) =>
 {
-    return Results.Ok(bugReports);
+    var bugs = await db.BugReports.ToListAsync();
+    return Results.Ok(bugs);
 });
 
-// READ one bug report by id
-app.MapGet("/api/bugs/{id:int}", (int id) =>
+// GET one bug report by ID
+app.MapGet("/api/bugs/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var bug = bugReports.FirstOrDefault(bug => bug.Id == id);
+    var bug = await db.BugReports.FindAsync(id);
 
     if (bug is null)
     {
@@ -250,8 +241,10 @@ app.MapGet("/api/bugs/{id:int}", (int id) =>
     return Results.Ok(bug);
 });
 
-// CREATE a new bug report
-app.MapPost("/api/bugs", (BugReport newBug) =>
+// POST a new bug report
+app.MapPost("/api/bugs", async (
+    BugReport newBug,
+    PlayTestOpsDbContext db) =>
 {
     if (string.IsNullOrWhiteSpace(newBug.Title))
     {
@@ -263,26 +256,28 @@ app.MapPost("/api/bugs", (BugReport newBug) =>
         return Results.BadRequest("Description is required.");
     }
 
-    var nextId = bugReports.Count == 0
-        ? 1
-        : bugReports.Max(bug => bug.Id) + 1;
-
-    newBug.Id = nextId;
+    newBug.Id = 0;
 
     if (newBug.CreatedAt == default)
     {
         newBug.CreatedAt = DateTime.UtcNow;
     }
 
-    bugReports.Add(newBug);
+    db.BugReports.Add(newBug);
+    await db.SaveChangesAsync();
 
-    return Results.Created($"/api/bugs/{newBug.Id}", newBug);
+    return Results.Created(
+        $"/api/bugs/{newBug.Id}",
+        newBug);
 });
 
-// UPDATE an existing bug report
-app.MapPut("/api/bugs/{id:int}", (int id, BugReport updatedBug) =>
+// PUT an existing bug report
+app.MapPut("/api/bugs/{id:int}", async (
+    int id,
+    BugReport updatedBug,
+    PlayTestOpsDbContext db) =>
 {
-    var bug = bugReports.FirstOrDefault(bug => bug.Id == id);
+    var bug = await db.BugReports.FindAsync(id);
 
     if (bug is null)
     {
@@ -296,34 +291,44 @@ app.MapPut("/api/bugs/{id:int}", (int id, BugReport updatedBug) =>
     bug.Status = updatedBug.Status;
     bug.ReproSteps = updatedBug.ReproSteps;
 
+    await db.SaveChangesAsync();
+
     return Results.Ok(bug);
 });
 
 // DELETE a bug report
-app.MapDelete("/api/bugs/{id:int}", (int id) =>
+app.MapDelete("/api/bugs/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var bug = bugReports.FirstOrDefault(bug => bug.Id == id);
+    var bug = await db.BugReports.FindAsync(id);
 
     if (bug is null)
     {
         return Results.NotFound("BugReport not found.");
     }
 
-    bugReports.Remove(bug);
+    db.BugReports.Remove(bug);
+    await db.SaveChangesAsync();
 
     return Results.NoContent();
 });
 
-// READ all feedback notes
-app.MapGet("/api/feedback", () =>
+// FEEDBACK NOTES
+
+// GET all feedback notes
+app.MapGet("/api/feedback", async (PlayTestOpsDbContext db) =>
 {
+    var feedbackNotes = await db.FeedbackNotes.ToListAsync();
     return Results.Ok(feedbackNotes);
 });
 
-// READ one feedback note by id
-app.MapGet("/api/feedback/{id:int}", (int id) =>
+// GET one feedback note by ID
+app.MapGet("/api/feedback/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var feedback = feedbackNotes.FirstOrDefault(feedback => feedback.Id == id);
+    var feedback = await db.FeedbackNotes.FindAsync(id);
 
     if (feedback is null)
     {
@@ -333,8 +338,10 @@ app.MapGet("/api/feedback/{id:int}", (int id) =>
     return Results.Ok(feedback);
 });
 
-// CREATE a new feedback note
-app.MapPost("/api/feedback", (FeedbackNote newFeedback) =>
+// POST a new feedback note
+app.MapPost("/api/feedback", async (
+    FeedbackNote newFeedback,
+    PlayTestOpsDbContext db) =>
 {
     if (string.IsNullOrWhiteSpace(newFeedback.Category))
     {
@@ -346,26 +353,28 @@ app.MapPost("/api/feedback", (FeedbackNote newFeedback) =>
         return Results.BadRequest("Comment is required.");
     }
 
-    var nextId = feedbackNotes.Count == 0
-        ? 1
-        : feedbackNotes.Max(feedback => feedback.Id) + 1;
-
-    newFeedback.Id = nextId;
+    newFeedback.Id = 0;
 
     if (newFeedback.CreatedAt == default)
     {
         newFeedback.CreatedAt = DateTime.UtcNow;
     }
 
-    feedbackNotes.Add(newFeedback);
+    db.FeedbackNotes.Add(newFeedback);
+    await db.SaveChangesAsync();
 
-    return Results.Created($"/api/feedback/{newFeedback.Id}", newFeedback);
+    return Results.Created(
+        $"/api/feedback/{newFeedback.Id}",
+        newFeedback);
 });
 
-// UPDATE an existing feedback note
-app.MapPut("/api/feedback/{id:int}", (int id, FeedbackNote updatedFeedback) =>
+// PUT an existing feedback note
+app.MapPut("/api/feedback/{id:int}", async (
+    int id,
+    FeedbackNote updatedFeedback,
+    PlayTestOpsDbContext db) =>
 {
-    var feedback = feedbackNotes.FirstOrDefault(feedback => feedback.Id == id);
+    var feedback = await db.FeedbackNotes.FindAsync(id);
 
     if (feedback is null)
     {
@@ -377,20 +386,25 @@ app.MapPut("/api/feedback/{id:int}", (int id, FeedbackNote updatedFeedback) =>
     feedback.Comment = updatedFeedback.Comment;
     feedback.Rating = updatedFeedback.Rating;
 
+    await db.SaveChangesAsync();
+
     return Results.Ok(feedback);
 });
 
 // DELETE a feedback note
-app.MapDelete("/api/feedback/{id:int}", (int id) =>
+app.MapDelete("/api/feedback/{id:int}", async (
+    int id,
+    PlayTestOpsDbContext db) =>
 {
-    var feedback = feedbackNotes.FirstOrDefault(feedback => feedback.Id == id);
+    var feedback = await db.FeedbackNotes.FindAsync(id);
 
     if (feedback is null)
     {
         return Results.NotFound("FeedbackNote not found.");
     }
 
-    feedbackNotes.Remove(feedback);
+    db.FeedbackNotes.Remove(feedback);
+    await db.SaveChangesAsync();
 
     return Results.NoContent();
 });

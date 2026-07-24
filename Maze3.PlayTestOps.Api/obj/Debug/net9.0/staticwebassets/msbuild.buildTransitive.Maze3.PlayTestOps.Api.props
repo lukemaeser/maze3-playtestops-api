@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\Maze3.PlayTestOps.Api.props" />
-</Project>
