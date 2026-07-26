@@ -6,6 +6,8 @@ public class PlaytestSession
 
     public int GameBuildId { get; set; }
 
+    public GameBuild? GameBuild { get; set; }
+
     public string TesterName { get; set; } = string.Empty;
 
     public string Platform { get; set; } = string.Empty;
@@ -13,4 +15,10 @@ public class PlaytestSession
     public DateTime SessionDate { get; set; }
 
     public string Notes { get; set; } = string.Empty;
+
+    public ICollection<BugReport> BugReports { get; set; }
+        = new List<BugReport>();
+
+    public ICollection<FeedbackNote> FeedbackNotes { get; set; }
+        = new List<FeedbackNote>();
 }

@@ -6,6 +6,8 @@ public class FeedbackNote
 
     public int PlaytestSessionId { get; set; }
 
+    public PlaytestSession? PlaytestSession { get; set; }
+
     public string Category { get; set; } = string.Empty;
 
     public string Comment { get; set; } = string.Empty;

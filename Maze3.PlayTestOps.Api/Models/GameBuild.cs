@@ -15,4 +15,7 @@ public class GameBuild
     public string ReleaseNotes { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<PlaytestSession> PlaytestSessions { get; set; }
+        = new List<PlaytestSession>();
 }

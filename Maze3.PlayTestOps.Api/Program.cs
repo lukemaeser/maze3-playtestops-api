@@ -17,6 +17,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<PlayTestOpsDbContext>();
+
+    await SeedData.InitializeAsync(db);
+}
+
 app.UseHttpsRedirection();
 
 // GAME BUILDS
@@ -41,6 +49,27 @@ app.MapGet("/api/gamebuilds/{id:int}", async (
     }
 
     return Results.Ok(build);
+});
+
+// GET all playtest sessions for one game build
+app.MapGet("/api/gamebuilds/{id:int}/sessions", async (
+    int id,
+    PlayTestOpsDbContext db) =>
+{
+    var buildExists = await db.GameBuilds
+        .AnyAsync(build => build.Id == id);
+
+    if (!buildExists)
+    {
+        return Results.NotFound(
+            $"GameBuild with ID {id} was not found.");
+    }
+
+    var sessions = await db.PlaytestSessions
+        .Where(session => session.GameBuildId == id)
+        .ToListAsync();
+
+    return Results.Ok(sessions);
 });
 
 // POST a new game build
@@ -145,6 +174,27 @@ app.MapGet("/api/sessions/{id:int}", async (
     return Results.Ok(session);
 });
 
+// GET all bug reports for one playtest session
+app.MapGet("/api/sessions/{id:int}/bugs", async (
+    int id,
+    PlayTestOpsDbContext db) =>
+{
+    var sessionExists = await db.PlaytestSessions
+        .AnyAsync(session => session.Id == id);
+
+    if (!sessionExists)
+    {
+        return Results.NotFound(
+            $"PlaytestSession with ID {id} was not found.");
+    }
+
+    var bugs = await db.BugReports
+        .Where(bug => bug.PlaytestSessionId == id)
+        .ToListAsync();
+
+    return Results.Ok(bugs);
+});
+
 // POST a new playtest session
 app.MapPost("/api/sessions", async (
     PlaytestSession newSession,
@@ -224,6 +274,19 @@ app.MapGet("/api/bugs", async (PlayTestOpsDbContext db) =>
 {
     var bugs = await db.BugReports.ToListAsync();
     return Results.Ok(bugs);
+});
+
+// GET all unresolved bug reports
+app.MapGet("/api/bugs/unresolved", async (
+    PlayTestOpsDbContext db) =>
+{
+    var unresolvedBugs = await db.BugReports
+        .Where(bug =>
+            bug.Status == "Open" ||
+            bug.Status == "InProgress")
+        .ToListAsync();
+
+    return Results.Ok(unresolvedBugs);
 });
 
 // GET one bug report by ID
@@ -320,6 +383,18 @@ app.MapDelete("/api/bugs/{id:int}", async (
 app.MapGet("/api/feedback", async (PlayTestOpsDbContext db) =>
 {
     var feedbackNotes = await db.FeedbackNotes.ToListAsync();
+    return Results.Ok(feedbackNotes);
+});
+
+// GET feedback notes by category
+app.MapGet("/api/feedback/category/{category}", async (
+    string category,
+    PlayTestOpsDbContext db) =>
+{
+    var feedbackNotes = await db.FeedbackNotes
+        .Where(feedback => feedback.Category == category)
+        .ToListAsync();
+
     return Results.Ok(feedbackNotes);
 });
 
