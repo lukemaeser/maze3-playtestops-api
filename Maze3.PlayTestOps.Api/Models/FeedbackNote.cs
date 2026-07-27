@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Maze3.PlayTestOps.Api.Models;
 
 public class FeedbackNote
@@ -5,6 +7,8 @@ public class FeedbackNote
     public int Id { get; set; }
 
     public int PlaytestSessionId { get; set; }
+
+    [JsonIgnore]
 
     public PlaytestSession? PlaytestSession { get; set; }
 

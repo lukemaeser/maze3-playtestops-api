@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Maze3.PlayTestOps.Api.Models;
 
 public class BugReport
@@ -6,6 +8,7 @@ public class BugReport
 
     public int PlaytestSessionId { get; set; }
 
+    [JsonIgnore]
     public PlaytestSession? PlaytestSession { get; set; }
 
     public string Title { get; set; } = string.Empty;

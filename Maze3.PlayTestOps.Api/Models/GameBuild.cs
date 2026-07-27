@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Maze3.PlayTestOps.Api.Models;
 
 public class GameBuild
@@ -16,6 +18,7 @@ public class GameBuild
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    [JsonIgnore]
     public ICollection<PlaytestSession> PlaytestSessions { get; set; }
         = new List<PlaytestSession>();
 }

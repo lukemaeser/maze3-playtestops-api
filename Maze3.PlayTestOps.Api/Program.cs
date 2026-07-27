@@ -15,6 +15,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint(
+            "/openapi/v1.json",
+            "MAZE3 PlayTestOps API v1");
+    });
 }
 
 using (var scope = app.Services.CreateScope())

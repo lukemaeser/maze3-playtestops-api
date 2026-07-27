@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Maze3.PlayTestOps.Api.Models;
 
 public class PlaytestSession
@@ -6,6 +8,7 @@ public class PlaytestSession
 
     public int GameBuildId { get; set; }
 
+    [JsonIgnore]
     public GameBuild? GameBuild { get; set; }
 
     public string TesterName { get; set; } = string.Empty;
@@ -16,9 +19,11 @@ public class PlaytestSession
 
     public string Notes { get; set; } = string.Empty;
 
+    [JsonIgnore]
     public ICollection<BugReport> BugReports { get; set; }
         = new List<BugReport>();
 
+    [JsonIgnore]
     public ICollection<FeedbackNote> FeedbackNotes { get; set; }
         = new List<FeedbackNote>();
 }

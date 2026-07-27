@@ -1,0 +1,48 @@
+@baseUrl = https://localhost:7136
+
+### Get all game builds
+GET {{baseUrl}}/api/gamebuilds
+Accept: application/json
+
+### Get all playtest sessions
+GET {{baseUrl}}/api/sessions
+Accept: application/json
+
+### Get all bug reports
+GET {{baseUrl}}/api/bugs
+Accept: application/json
+
+### Get all feedback notes
+GET {{baseUrl}}/api/feedback
+Accept: application/json
+
+### Create a game build
+# @name createGameBuild
+POST {{baseUrl}}/api/gamebuilds
+Content-Type: application/json
+Accept: application/json
+
+{
+  "projectName": "MAZE3 REST Client Test",
+  "version": "0.0.2",
+  "branch": "test/rest-client",
+  "buildDate": "2026-07-27T00:00:00Z",
+  "releaseNotes": "Created through the VS Code REST Client."
+}
+
+### Update the created game build
+PUT {{baseUrl}}/api/gamebuilds/{{createGameBuild.response.body.$.id}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "projectName": "MAZE3 REST Client Test",
+  "version": "0.0.3",
+  "branch": "test/rest-client",
+  "buildDate": "2026-07-27T00:00:00Z",
+  "releaseNotes": "Updated through the VS Code REST Client."
+}
+
+### Delete the created game build
+DELETE {{baseUrl}}/api/gamebuilds/{{createGameBuild.response.body.$.id}}
+Accept: application/json
