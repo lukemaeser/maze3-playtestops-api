@@ -94,7 +94,7 @@ app.MapPost("/api/gamebuilds", async (
         return Results.BadRequest("Version is required.");
     }
 
-    // SQL Server now generates the ID.
+    // SQL Server generates the ID.
     newBuild.Id = 0;
 
     if (newBuild.BuildDate == default)
@@ -109,6 +109,11 @@ app.MapPost("/api/gamebuilds", async (
 
     db.GameBuilds.Add(newBuild);
     await db.SaveChangesAsync();
+
+    app.Logger.LogInformation(
+        "Created game build {GameBuildId} for project {ProjectName}",
+        newBuild.Id,
+        newBuild.ProjectName);
 
     return Results.Created(
         $"/api/gamebuilds/{newBuild.Id}",
@@ -136,6 +141,11 @@ app.MapPut("/api/gamebuilds/{id:int}", async (
 
     await db.SaveChangesAsync();
 
+    app.Logger.LogInformation(
+        "Updated game build {GameBuildId} for project {ProjectName}",
+        build.Id,
+        build.ProjectName);
+
     return Results.Ok(build);
 });
 
@@ -153,6 +163,11 @@ app.MapDelete("/api/gamebuilds/{id:int}", async (
 
     db.GameBuilds.Remove(build);
     await db.SaveChangesAsync();
+
+    app.Logger.LogInformation(
+        "Deleted game build {GameBuildId} for project {ProjectName}",
+        build.Id,
+        build.ProjectName);
 
     return Results.NoContent();
 });
@@ -227,6 +242,11 @@ app.MapPost("/api/sessions", async (
     db.PlaytestSessions.Add(newSession);
     await db.SaveChangesAsync();
 
+    app.Logger.LogInformation(
+        "Created playtest session {PlaytestSessionId} for game build {GameBuildId}",
+        newSession.Id,
+        newSession.GameBuildId);
+
     return Results.Created(
         $"/api/sessions/{newSession.Id}",
         newSession);
@@ -253,6 +273,10 @@ app.MapPut("/api/sessions/{id:int}", async (
 
     await db.SaveChangesAsync();
 
+    app.Logger.LogInformation(
+        "Updated playtest session {PlaytestSessionId}",
+        session.Id);
+
     return Results.Ok(session);
 });
 
@@ -270,6 +294,10 @@ app.MapDelete("/api/sessions/{id:int}", async (
 
     db.PlaytestSessions.Remove(session);
     await db.SaveChangesAsync();
+
+    app.Logger.LogInformation(
+        "Deleted playtest session {PlaytestSessionId}",
+        session.Id);
 
     return Results.NoContent();
 });
@@ -336,6 +364,11 @@ app.MapPost("/api/bugs", async (
     db.BugReports.Add(newBug);
     await db.SaveChangesAsync();
 
+    app.Logger.LogInformation(
+        "Created bug report {BugReportId} with severity {Severity}",
+        newBug.Id,
+        newBug.Severity);
+
     return Results.Created(
         $"/api/bugs/{newBug.Id}",
         newBug);
@@ -363,6 +396,11 @@ app.MapPut("/api/bugs/{id:int}", async (
 
     await db.SaveChangesAsync();
 
+    app.Logger.LogInformation(
+        "Updated bug report {BugReportId} with status {Status}",
+        bug.Id,
+        bug.Status);
+
     return Results.Ok(bug);
 });
 
@@ -380,6 +418,10 @@ app.MapDelete("/api/bugs/{id:int}", async (
 
     db.BugReports.Remove(bug);
     await db.SaveChangesAsync();
+
+    app.Logger.LogInformation(
+        "Deleted bug report {BugReportId}",
+        bug.Id);
 
     return Results.NoContent();
 });
@@ -445,6 +487,11 @@ app.MapPost("/api/feedback", async (
     db.FeedbackNotes.Add(newFeedback);
     await db.SaveChangesAsync();
 
+    app.Logger.LogInformation(
+        "Created feedback note {FeedbackNoteId} in category {Category}",
+        newFeedback.Id,
+        newFeedback.Category);
+
     return Results.Created(
         $"/api/feedback/{newFeedback.Id}",
         newFeedback);
@@ -470,6 +517,10 @@ app.MapPut("/api/feedback/{id:int}", async (
 
     await db.SaveChangesAsync();
 
+    app.Logger.LogInformation(
+        "Updated feedback note {FeedbackNoteId}",
+        feedback.Id);
+
     return Results.Ok(feedback);
 });
 
@@ -487,6 +538,10 @@ app.MapDelete("/api/feedback/{id:int}", async (
 
     db.FeedbackNotes.Remove(feedback);
     await db.SaveChangesAsync();
+
+    app.Logger.LogInformation(
+        "Deleted feedback note {FeedbackNoteId}",
+        feedback.Id);
 
     return Results.NoContent();
 });
