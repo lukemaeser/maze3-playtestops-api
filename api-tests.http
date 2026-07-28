@@ -1,4 +1,11 @@
 @baseUrl = https://localhost:7136
+@gameBuildId = 2
+@playtestSessionId = 2
+@feedbackCategory = Gameplay
+
+### ============================================================
+### CORE GET REQUESTS
+### ============================================================
 
 ### Get all game builds
 GET {{baseUrl}}/api/gamebuilds
@@ -16,7 +23,32 @@ Accept: application/json
 GET {{baseUrl}}/api/feedback
 Accept: application/json
 
-### Create a game build
+### ============================================================
+### WORKFLOW QUERY REQUESTS
+### ============================================================
+
+### Get all playtest sessions for one game build
+GET {{baseUrl}}/api/gamebuilds/{{gameBuildId}}/sessions
+Accept: application/json
+
+### Get all bug reports for one playtest session
+GET {{baseUrl}}/api/sessions/{{playtestSessionId}}/bugs
+Accept: application/json
+
+### Get all unresolved bug reports
+GET {{baseUrl}}/api/bugs/unresolved
+Accept: application/json
+
+### Get feedback notes by category
+GET {{baseUrl}}/api/feedback/category/{{feedbackCategory}}
+Accept: application/json
+
+### ============================================================
+### GAME BUILD CRUD REGRESSION TEST
+### Run these requests in order: POST, PUT, DELETE
+### ============================================================
+
+### Create a temporary game build
 # @name createGameBuild
 POST {{baseUrl}}/api/gamebuilds
 Content-Type: application/json
@@ -24,25 +56,25 @@ Accept: application/json
 
 {
   "projectName": "MAZE3 REST Client Test",
-  "version": "0.0.2",
-  "branch": "test/rest-client",
-  "buildDate": "2026-07-27T00:00:00Z",
-  "releaseNotes": "Created through the VS Code REST Client."
+  "version": "1.0.0-test",
+  "branch": "test/api-regression",
+  "buildDate": "2026-07-28T12:00:00Z",
+  "releaseNotes": "Temporary record created to verify the refactored endpoints."
 }
 
-### Update the created game build
+### Update the temporary game build
 PUT {{baseUrl}}/api/gamebuilds/{{createGameBuild.response.body.$.id}}
 Content-Type: application/json
 Accept: application/json
 
 {
   "projectName": "MAZE3 REST Client Test",
-  "version": "0.0.3",
-  "branch": "test/rest-client",
-  "buildDate": "2026-07-27T00:00:00Z",
-  "releaseNotes": "Updated through the VS Code REST Client."
+  "version": "1.0.1-test",
+  "branch": "test/api-regression",
+  "buildDate": "2026-07-28T12:00:00Z",
+  "releaseNotes": "Temporary record successfully updated after endpoint refactoring."
 }
 
-### Delete the created game build
+### Delete the temporary game build
 DELETE {{baseUrl}}/api/gamebuilds/{{createGameBuild.response.body.$.id}}
 Accept: application/json
